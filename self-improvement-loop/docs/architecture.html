@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Improvement Loop - Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: #1a2235;
+      --bg-card-hover: #222d45;
+      --accent-cyan: #22d3ee;
+      --accent-purple: #a78bfa;
+      --accent-green: #34d399;
+      --accent-orange: #fb923c;
+      --accent-red: #f87171;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border-color: #334155;
+      --glow-cyan: 0 0 20px rgba(34, 211, 238, 0.3);
+      --glow-purple: 0 0 20px rgba(167, 139, 250, 0.3);
+      --glow-green: 0 0 20px rgba(52, 211, 153, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background Grid Effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 80px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.15), rgba(167, 139, 250, 0.15));
+      border: 1px solid var(--accent-cyan);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 56px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      font-size: 20px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Section Titles */
+    .section {
+      margin-bottom: 100px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 12px;
+    }
+
+    .section-heading {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      color: var(--text-secondary);
+      font-size: 18px;
+      max-width: 700px;
+    }
+
+    /* Architecture Diagram */
+    .architecture-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .architecture-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+    }
+
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      align-items: center;
+    }
+
+    .flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .flow-node {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px 28px;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+      min-width: 180px;
+    }
+
+    .flow-node:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .flow-node.highlight-cyan {
+      border-color: var(--accent-cyan);
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), transparent);
+    }
+
+    .flow-node.highlight-purple {
+      border-color: var(--accent-purple);
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), transparent);
+    }
+
+    .flow-node.highlight-green {
+      border-color: var(--accent-green);
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.1), transparent);
+    }
+
+    .flow-node.highlight-orange {
+      border-color: var(--accent-orange);
+      background: linear-gradient(135deg, rgba(251, 146, 60, 0.1), transparent);
+    }
+
+    .node-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .node-title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .node-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .flow-arrow {
+      color: var(--accent-cyan);
+      font-size: 24px;
+      animation: pulseDown 1.5s ease-in-out infinite;
+    }
+
+    .flow-arrow-right {
+      animation: pulseRight 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseDown {
+      0%, 100% { opacity: 0.4; transform: translateY(-3px); }
+      50% { opacity: 1; transform: translateY(3px); }
+    }
+
+    @keyframes pulseRight {
+      0%, 100% { opacity: 0.4; transform: translateX(-3px); }
+      50% { opacity: 1; transform: translateX(3px); }
+    }
+
+    /* SVG Flow Lines */
+    .flow-svg {
+      width: 100%;
+      height: 40px;
+      overflow: visible;
+    }
+
+    .flow-line {
+      stroke: var(--accent-cyan);
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 8 4;
+      animation: dashFlow 1s linear infinite;
+    }
+
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -12; }
+    }
+
+    /* Per-Agent Isolation */
+    .agent-isolation {
+      margin-top: 60px;
+      text-align: center;
+    }
+
+    .agent-isolation-title {
+      font-size: 14px;
+      color: var(--accent-purple);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+    }
+
+    .agent-cards {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .agent-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .agent-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .agent-card:nth-child(1) .agent-avatar { background: linear-gradient(135deg, var(--accent-cyan), #0891b2); }
+    .agent-card:nth-child(2) .agent-avatar { background: linear-gradient(135deg, var(--accent-purple), #7c3aed); }
+    .agent-card:nth-child(3) .agent-avatar { background: linear-gradient(135deg, var(--accent-green), #059669); }
+
+    .agent-info {
+      text-align: left;
+    }
+
+    .agent-name {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .agent-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .feature-card:nth-child(1)::before { background: var(--accent-cyan); }
+    .feature-card:nth-child(2)::before { background: var(--accent-purple); }
+    .feature-card:nth-child(3)::before { background: var(--accent-green); }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: transparent;
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-card:nth-child(1):hover { box-shadow: var(--glow-cyan); }
+    .feature-card:nth-child(2):hover { box-shadow: var(--glow-purple); }
+    .feature-card:nth-child(3):hover { box-shadow: var(--glow-green); }
+
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .feature-card:nth-child(1) .feature-icon { background: rgba(34, 211, 238, 0.15); }
+    .feature-card:nth-child(2) .feature-icon { background: rgba(167, 139, 250, 0.15); }
+    .feature-card:nth-child(3) .feature-icon { background: rgba(52, 211, 153, 0.15); }
+
+    .feature-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .feature-desc {
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      font-size: 15px;
+    }
+
+    .feature-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .feature-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    /* Tech Stack */
+    .tech-stack {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    .tech-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 32px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .tech-item:hover {
+      border-color: var(--accent-purple);
+      transform: translateY(-2px);
+    }
+
+    .tech-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .tech-item:nth-child(1) .tech-logo { color: #68A063; }
+    .tech-item:nth-child(2) .tech-logo { color: #f7df1e; }
+    .tech-item:nth-child(3) .tech-logo { color: #22d3ee; }
+    .tech-item:nth-child(4) .tech-logo { color: #fb923c; }
+
+    .tech-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .tech-role {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Data Flow Animation Demo */
+    .flow-demo {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .demo-track {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      position: relative;
+      height: 80px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .demo-step {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      position: relative;
+      z-index: 1;
+      padding: 0 16px;
+      text-align: center;
+    }
+
+    .demo-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 10px solid var(--border-color);
+      z-index: 2;
+    }
+
+    .demo-step.active {
+      background: rgba(34, 211, 238, 0.2);
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    .demo-packet {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: var(--glow-cyan);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      left: 0;
+      transition: left 0.8s ease-in-out;
+    }
+
+    .demo-controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .demo-btn {
+      padding: 10px 24px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .demo-btn:hover {
+      background: var(--accent-cyan);
+      color: var(--bg-primary);
+      border-color: var(--accent-cyan);
+    }
+
+    .demo-status {
+      text-align: center;
+      margin-top: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Components Table */
+    .components-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 40px;
+      font-size: 14px;
+    }
+
+    .components-table th,
+    .components-table td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .components-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 12px;
+    }
+
+    .components-table tr:hover td {
+      background: var(--bg-card);
+    }
+
+    .components-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-cyan);
+    }
+
+    .file-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 0;
+      border-top: 1px solid var(--border-color);
+      margin-top: 60px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 { font-size: 36px; }
+      .section-heading { font-size: 28px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .flow-row { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+      .tech-stack { gap: 20px; }
+      .agent-cards { flex-direction: column; align-items: center; }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.6s ease-out forwards;
+      opacity: 0;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <span class="badge">v4.6.14</span>
+      <h1>Self-Improvement Loop</h1>
+      <p class="subtitle">Per-agent feedback loop that captures corrections, detects patterns, and enables autonomous improvement</p>
+    </header>
+
+    <!-- Architecture Section -->
+    <section class="section">
+      <div class="section-title">Architecture</div>
+      <h2 class="section-heading">Data Flow & Components</h2>
+      <p class="section-desc">The self-improvement loop creates an autonomous feedback cycle that captures corrections, detects recurring patterns, and notifies the agent for action.</p>
+
+      <div class="architecture-container animate-in delay-1">
+        <div class="flow-diagram">
+          <!-- Row 1: Capture -->
+          <div class="flow-row">
+            <div class="flow-node highlight-cyan">
+              <span class="node-icon">&#9998;</span>
+              <div class="node-title">User Correction</div>
+              <div class="node-desc">"不对", "错了", "actually"</div>
+            </div>
+            <span class="flow-arrow flow-arrow-right">&#10140;</span>
+            <div class="flow-node highlight-cyan">
+              <span class="node-icon">&#128640;</span>
+              <div class="node-title">Hook Handler</div>
+              <div class="node-desc">hooks/handler.js</div>
+            </div>
+            <span class="flow-arrow flow-arrow-right">&#10140;</span>
+            <div class="flow-node highlight-cyan">
+              <span class="node-icon">&#128196;</span>
+              <div class="node-title">.learnings/</div>
+              <div class="node-desc">Per-agent workspace</div>
+            </div>
+          </div>
+
+          <!-- Arrow Down -->
+          <svg class="flow-svg" viewBox="0 0 100 40" preserveAspectRatio="none">
+            <path class="flow-line" d="M50,0 L50,40" />
+          </svg>
+
+          <!-- Row 2: Distill -->
+          <div class="flow-row">
+            <div class="flow-node highlight-purple">
+              <span class="node-icon">&#128337;</span>
+              <div class="node-title">Hourly Cron</div>
+              <div class="node-desc">setup_crons.py</div>
+            </div>
+            <span class="flow-arrow flow-arrow-right">&#10140;</span>
+            <div class="flow-node highlight-purple">
+              <span class="node-icon">&#9881;</span>
+              <div class="node-title">Distill Script</div>
+              <div class="node-desc">scripts/distill.sh</div>
+            </div>
+            <span class="flow-arrow flow-arrow-right">&#10140;</span>
+            <div class="flow-node highlight-purple">
+              <span class="node-icon">&#128269;</span>
+              <div class="node-title">Pattern Detection</div>
+              <div class="node-desc">count &ge; 2 triggers</div>
+            </div>
+          </div>
+
+          <!-- Arrow Down -->
+          <svg class="flow-svg" viewBox="0 0 100 40" preserveAspectRatio="none">
+            <path class="flow-line" d="M50,0 L50,40" />
+          </svg>
+
+          <!-- Row 3: Notify & Act -->
+          <div class="flow-row">
+            <div class="flow-node highlight-green">
+              <span class="node-icon">&#128276;</span>
+              <div class="node-title">Channel Bot</div>
+              <div class="node-desc">Telegram/Discord/etc</div>
+            </div>
+            <span class="flow-arrow flow-arrow-right">&#10140;</span>
+            <div class="flow-node highlight-orange">
+              <span class="node-icon">&#128172;</span>
+              <div class="node-title">User Response</div>
+              <div class="node-desc">A / B / C / D decision</div>
+            </div>
+            <span class="flow-arrow flow-arrow-right">&#10140;</span>
+            <div class="flow-node highlight-green">
+              <span class="node-icon">&#127793;</span>
+              <div class="node-title">Agent Executes</div>
+              <div class="node-desc">Correct session runs</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Per-Agent Isolation -->
+        <div class="agent-isolation">
+          <div class="agent-isolation-title">Per-Agent Isolation</div>
+          <div class="agent-cards">
+            <div class="agent-card">
+              <div class="agent-avatar">CD</div>
+              <div class="agent-info">
+                <div class="agent-name">code-dev</div>
+                <div class="agent-path">workspace/agents/code-dev/.learnings/</div>
+              </div>
+            </div>
+            <div class="agent-card">
+              <div class="agent-avatar">PM</div>
+              <div class="agent-info">
+                <div class="agent-name">project-mgr</div>
+                <div class="agent-path">workspace/agents/project-mgr/.learnings/</div>
+              </div>
+            </div>
+            <div class="agent-card">
+              <div class="agent-avatar">RE</div>
+              <div class="agent-info">
+                <div class="agent-name">researcher</div>
+                <div class="agent-path">workspace/agents/researcher/.learnings/</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section">
+      <div class="section-title">Core Features</div>
+      <h2 class="section-heading">Three Pillars of Improvement</h2>
+
+      <div class="features-grid">
+        <div class="feature-card animate-in delay-1">
+          <div class="feature-icon">&#128640;</div>
+          <h3 class="feature-title">Real-Time Capture</h3>
+          <p class="feature-desc">Hook intercepts messages at preprocessed stage, detecting corrections, errors, and feature requests in real-time with multilingual support.</p>
+          <div class="feature-tags">
+            <span class="feature-tag">Node.js Hooks</span>
+            <span class="feature-tag">keyword detection</span>
+            <span class="feature-tag">session routing</span>
+          </div>
+        </div>
+
+        <div class="feature-card animate-in delay-2">
+          <div class="feature-icon">&#9881;</div>
+          <h3 class="feature-title">Pattern Detection</h3>
+          <p class="feature-desc">Hourly cron runs distill script to scan learnings, aggregate by Pattern-Key, and identify recurring mistakes (count &ge; 2 threshold).</p>
+          <div class="feature-tags">
+            <span class="feature-tag">Bash Scripts</span>
+            <span class="feature-tag">AWK aggregation</span>
+            <span class="feature-tag">threshold logic</span>
+          </div>
+        </div>
+
+        <div class="feature-card animate-in delay-3">
+          <div class="feature-icon">&#128276;</div>
+          <h3 class="feature-title">Smart Notifications</h3>
+          <p class="feature-desc">Channel-specific bots deliver actionable notifications. User responds with A/B/C/D, triggering the correct agent session to execute improvements.</p>
+          <div class="feature-tags">
+            <span class="feature-tag">per-agent routing</span>
+            <span class="feature-tag">Telegram/Discord</span>
+            <span class="feature-tag">A/B/C/D decisions</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Flow Demo Section -->
+    <section class="section">
+      <div class="section-title">Interactive Demo</div>
+      <h2 class="section-heading">Feedback Loop in Action</h2>
+      <p class="section-desc">Watch how a single user correction flows through the entire system.</p>
+
+      <div class="flow-demo animate-in delay-1">
+        <div class="demo-track" id="demoTrack">
+          <div class="demo-step" data-step="0">User<br>Corrects</div>
+          <div class="demo-step" data-step="1">Hook<br>Captures</div>
+          <div class="demo-step" data-step="2">写入<br>LEARNINGS.md</div>
+          <div class="demo-step" data-step="3">Hourly<br>Distill</div>
+          <div class="demo-step" data-step="4">Pattern<br>Detected</div>
+          <div class="demo-step" data-step="5">Bot<br>Notifies</div>
+          <div class="demo-step" data-step="6">User<br>A/B/C/D</div>
+          <div class="demo-step" data-step="7">Agent<br>Improves</div>
+          <div class="demo-packet" id="demoPacket"></div>
+        </div>
+        <div class="demo-controls">
+          <button class="demo-btn" onclick="startDemo()">Start Flow</button>
+          <button class="demo-btn" onclick="resetDemo()">Reset</button>
+        </div>
+        <div class="demo-status" id="demoStatus">Ready to simulate the feedback loop</div>
+      </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section class="section">
+      <div class="section-title">Technology Stack</div>
+      <h2 class="section-heading">Built with Modern Tools</h2>
+
+      <div class="tech-stack">
+        <div class="tech-item animate-in delay-1">
+          <div class="tech-logo">Node.js</div>
+          <div class="tech-name">Node.js</div>
+          <div class="tech-role">Hook Handler</div>
+        </div>
+        <div class="tech-item animate-in delay-2">
+          <div class="tech-logo">Python</div>
+          <div class="tech-name">Python 3</div>
+          <div class="tech-role">Cron Setup & JSON</div>
+        </div>
+        <div class="tech-item animate-in delay-3">
+          <div class="tech-logo">Bash</div>
+          <div class="tech-name">Bash Scripts</div>
+          <div class="tech-role">Distill & Archive</div>
+        </div>
+        <div class="tech-item animate-in delay-4">
+          <div class="tech-logo">AWK</div>
+          <div class="tech-name">AWK</div>
+          <div class="tech-role">Pattern Aggregation</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Components Table -->
+    <section class="section">
+      <div class="section-title">Reference</div>
+      <h2 class="section-heading">Key Components</h2>
+
+      <table class="components-table">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Path</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>install.sh</td>
+            <td><span class="file-badge">install.sh</span></td>
+            <td>Install skill, create per-agent crons, inject bindings</td>
+          </tr>
+          <tr>
+            <td>handler.js</td>
+            <td><span class="file-badge">hooks/</span></td>
+            <td>Hook captures corrections, routes to agent workspace</td>
+          </tr>
+          <tr>
+            <td>distill.sh</td>
+            <td><span class="file-badge">scripts/</span></td>
+            <td>Distill learnings into aggregated JSON with pattern detection</td>
+          </tr>
+          <tr>
+            <td>setup_crons.py</td>
+            <td><span class="file-badge">scripts/</span></td>
+            <td>Create and manage per-agent cron jobs</td>
+          </tr>
+          <tr>
+            <td>archive.sh</td>
+            <td><span class="file-badge">scripts/</span></td>
+            <td>Archive learnings older than 30 days</td>
+          </tr>
+          <tr>
+            <td>LEARNINGS.md</td>
+            <td><span class="file-badge">learnings/</span></td>
+            <td>Record corrections, insights, best practices</td>
+          </tr>
+          <tr>
+            <td>ERRORS.md</td>
+            <td><span class="file-badge">learnings/</span></td>
+            <td>Log command/operation failures</td>
+          </tr>
+          <tr>
+            <td>FEATURE_REQUESTS.md</td>
+            <td><span class="file-badge">learnings/</span></td>
+            <td>Track missing feature requests</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      <p>Self-Improvement Loop v4.6.14 &mdash; Per-agent feedback system for OpenClaw</p>
+      <p style="margin-top: 8px;"><a href="https://github.com/openclaw/self-improvement-loop">Documentation</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // Flow Demo Animation
+    let demoRunning = false;
+    const packet = document.getElementById('demoPacket');
+    const track = document.getElementById('demoTrack');
+    const status = document.getElementById('demoStatus');
+    const steps = document.querySelectorAll('.demo-step');
+
+    function getStepPosition(index) {
+      const trackWidth = track.offsetWidth;
+      const stepWidth = trackWidth / steps.length;
+      const packetWidth = packet.offsetWidth;
+      // Position packet in center of each step
+      const stepCenter = (index * stepWidth) + (stepWidth / 2);
+      return stepCenter - (packetWidth / 2);
+    }
+
+    function startDemo() {
+      if (demoRunning) return;
+      demoRunning = true;
+
+      const messages = [
+        'User says: "不对，应该是..."',
+        'Hook intercepts message',
+        'Writing to agent\'s .learnings/LEARNINGS.md',
+        'Hourly cron triggers distill.sh',
+        'Pattern detected: same mistake twice!',
+        'Notification sent via Telegram bot',
+        'User responds: "A - apply correction"',
+        'Agent session executes improvement'
+      ];
+
+      let currentStep = 0;
+
+      function moveToStep(step) {
+        if (step >= steps.length) {
+          status.textContent = 'Feedback loop completed!';
+          demoRunning = false;
+          return;
+        }
+
+        // Remove active from all steps
+        steps.forEach(s => s.classList.remove('active'));
+
+        // Highlight current step
+        steps[step].classList.add('active');
+
+        // Move packet
+        packet.style.left = getStepPosition(step) + 'px';
+
+        // Update status
+        status.textContent = messages[step];
+
+        // Highlight current node in architecture diagram
+        highlightArchitectureNode(step);
+
+        currentStep = step;
+        setTimeout(() => moveToStep(step + 1), 1000);
+      }
+
+      moveToStep(0);
+    }
+
+    function resetDemo() {
+      demoRunning = false;
+      steps.forEach(s => s.classList.remove('active'));
+      packet.style.left = '0px';
+      status.textContent = 'Ready to simulate the feedback loop';
+      resetArchitectureNodes();
+    }
+
+    function highlightArchitectureNode(step) {
+      // Reset all flow nodes
+      document.querySelectorAll('.flow-node').forEach(n => {
+        n.style.boxShadow = 'none';
+      });
+
+      // Highlight based on step
+      const nodes = document.querySelectorAll('.flow-node');
+      if (step === 0 || step === 1 || step === 2) {
+        // User correction flow
+        nodes[0].style.boxShadow = 'var(--glow-cyan)';
+        nodes[1].style.boxShadow = 'var(--glow-cyan)';
+        nodes[2].style.boxShadow = 'var(--glow-cyan)';
+      } else if (step === 3 || step === 4) {
+        // Distill flow
+        nodes[3].style.boxShadow = 'var(--glow-purple)';
+        nodes[4].style.boxShadow = 'var(--glow-purple)';
+        nodes[5].style.boxShadow = 'var(--glow-purple)';
+      } else if (step === 5 || step === 6) {
+        // Notify flow
+        nodes[6].style.boxShadow = 'var(--glow-green)';
+        nodes[7].style.boxShadow = 'var(--glow-green)';
+      } else if (step === 7) {
+        // Execute
+        nodes[8].style.boxShadow = 'var(--glow-green)';
+      }
+    }
+
+    function resetArchitectureNodes() {
+      document.querySelectorAll('.flow-node').forEach(n => {
+        n.style.boxShadow = 'none';
+      });
+    }
+
+    // Intersection Observer for animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate-in').forEach(el => {
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+
+    // Resize handler for demo
+    window.addEventListener('resize', () => {
+      const activeStep = document.querySelector('.demo-step.active');
+      if (activeStep) {
+        const stepIndex = parseInt(activeStep.dataset.step);
+        packet.style.left = getStepPosition(stepIndex) + 'px';
+      }
+    });
+  </script>
+</body>
+</html>

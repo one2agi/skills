@@ -1,0 +1,101 @@
+{
+  "projectName": "self-improvement-loop",
+  "generated": "2026-04-26",
+  "version": "4.6.13",
+  "ownerId": "kn70ps8raw9bhs1czcvkg53z31842jqm",
+  "description": "Per-agent feedback loop for OpenClaw — captures corrections/errors/features, detects patterns, notifies via per-agent channel bot, and executes A/B/C/D decisions",
+  "entryPoints": [
+    {
+      "name": "install.sh",
+      "path": "install.sh",
+      "type": "installer",
+      "purpose": "Installs self-improvement-loop into agent workspaces"
+    },
+    {
+      "name": "setup_crons.py",
+      "path": "scripts/setup_crons.py",
+      "type": "cron",
+      "purpose": "Creates per-agent cron jobs for pattern detection"
+    },
+    {
+      "name": "handler.js",
+      "path": "hooks/handler.js",
+      "type": "hook",
+      "purpose": "Processes OpenClaw hook events"
+    }
+  ],
+  "coreModules": [
+    {
+      "name": "setup_crons.py",
+      "path": "scripts/setup_crons.py",
+      "exports": ["setup_crons", "create_agent_crons", "get_agent_info"],
+      "purpose": "Creates and manages per-agent cron jobs"
+    },
+    {
+      "name": "distill_json.py",
+      "path": "scripts/distill_json.py",
+      "exports": ["distill_learnings", "extract_patterns", "generate_suggestions"],
+      "purpose": "Distills raw learnings into structured patterns"
+    },
+    {
+      "name": "archive.sh",
+      "path": "scripts/archive.sh",
+      "exports": ["archive_old_learnings", "rotate_archives"],
+      "purpose": "Archives learnings older than threshold"
+    },
+    {
+      "name": "write_notified.py",
+      "path": "scripts/write_notified.py",
+      "exports": ["mark_notified", "check_notified"],
+      "purpose": "Tracks notified patterns to prevent duplicates"
+    },
+    {
+      "name": "agents-append.md",
+      "path": "scripts/agents-append.md",
+      "purpose": "A/B/C/D decision handling logic"
+    }
+  ],
+  "hooks": [
+    {
+      "name": "handler.js",
+      "path": "hooks/handler.js",
+      "purpose": "Processes corrections, errors, feature requests from OpenClaw"
+    }
+  ],
+  "configuration": [
+    {
+      "file": "cron-payloads.json",
+      "purpose": "Defines cron job payloads for distill and archive operations"
+    },
+    {
+      "file": "_meta.json",
+      "purpose": "Package metadata"
+    }
+  ],
+  "documentation": [
+    {
+      "file": "SKILL.md",
+      "topic": "Main skill documentation with data flow, per-agent architecture"
+    },
+    {
+      "file": "references/setup-guide.md",
+      "topic": "Setup guide"
+    },
+    {
+      "file": "hooks/HOOK.md",
+      "topic": "Hook documentation"
+    }
+  ],
+  "dataFlow": {
+    "step1": "User correction captured by hook",
+    "step2": "Writes to {agent}/.learnings/",
+    "step3": "Hourly cron (distill) detects patterns (count ≥ 2)",
+    "step4": "Notification via agent's channel bot",
+    "step5": "User responds A/B/C/D → correct agent session executes"
+  },
+  "directoryStructure": {
+    "root": "self-improvement-loop",
+    "subdirs": ["scripts", "hooks", "learnings", "references", ".clawhub"],
+    "generatedDirs": ["workspace/agents/{agent-name}/.learnings/"]
+  }
+}
