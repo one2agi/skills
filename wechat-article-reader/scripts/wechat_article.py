@@ -85,16 +85,24 @@ def search_fakeid(cookie, token, name):
     return None, None
 
 def get_account_by_biz(cookie, token, biz):
-    """通过 biz 获取公众号信息（fakeid 和 nickname）"""
-    url = "https://mp.weixin.qq.com/cgi-bin/searchbiz"
+    """根据 biz（Base64 fakeid）获取公众号 fakeid 和 nickname。
+
+    biz 就是 fakeid 的 Base64 编码。直接用 biz 作为 fakeid 调用 list_ex，
+    从 app_msg_list 获取公众号昵称。
+    """
+    import datetime
+    url = "https://mp.weixin.qq.com/cgi-bin/appmsg"
     params = {
-        "action": "search_biz",
+        "action": "list_ex",
         "token": token,
         "lang": "zh_CN",
         "f": "json",
         "ajax": "1",
         "random": str(time.time()),
-        "fakeid": biz  # biz can be used as fakeid for account lookup
+        "fakeid": biz,  # biz == base64(numeric_fakeid)
+        "type": "9",
+        "count": 20,  # Must use >=5, API returns empty otherwise
+        "begin": "0",
     }
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -104,8 +112,11 @@ def get_account_by_biz(cookie, token, biz):
     r = requests.get(url, params=params, headers=headers)
     data = r.json()
 
-    if data.get("base_resp", {}).get("ret") == 0 and data.get("list"):
-        return data["list"][0]["fakeid"], data["list"][0]["nickname"]
+    if data.get("base_resp", {}).get("ret") == 0 and data.get("app_msg_list"):
+        nickname = data["app_msg_list"][0].get("nickname", "")
+        if not nickname:
+            nickname = data["app_msg_list"][0].get("title", "")[:20] + "..."
+        return biz, nickname
     return None, None
 
 def get_article_list(cookie, token, fakeid, count=10, start_date=None, end_date=None):

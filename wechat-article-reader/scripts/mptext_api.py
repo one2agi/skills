@@ -247,23 +247,41 @@ class MpTextAPI:
             文章内容
         """
         import urllib.parse
-        
-        params = {
-            'url': url,
-            'format': format,
-        }
-        
+        import json as _json
+
+        params_text = {'url': url, 'format': 'text'}
+        params_json = {'url': url, 'format': 'json'}
+
+        content = ''
         try:
-            # text/markdown 格式返回纯文本，不需要 JSON 解析
+            # text/markdown 格式：mptext text/plain 返回空，实际内容在 json 格式里
             if format in ('text', 'markdown'):
-                r = self.session.get(f"{self.api_base}/api/public/v1/download", params=params, timeout=60)
-                content = r.text
+                r_text = self.session.get(f"{self.api_base}/api/public/v1/download", params=params_text, timeout=60)
+                raw_text = r_text.text
+                if raw_text.strip():
+                    # 有内容则解析
+                    try:
+                        parsed = _json.loads(raw_text)
+                        content = parsed.get('content_noencode', '') or parsed.get('title', '') or raw_text
+                    except _json.JSONDecodeError:
+                        content = raw_text.strip()
+                else:
+                    # text 格式返回空，fallback 到 json 格式提取 content_noencode / title
+                    r_json = self.session.get(f"{self.api_base}/api/public/v1/download", params=params_json, timeout=60)
+                    try:
+                        parsed = _json.loads(r_json.text)
+                        content = parsed.get('content_noencode', '') or parsed.get('title', '')
+                    except _json.JSONDecodeError:
+                        content = ''
             else:
                 # json/html 格式返回 JSON
-                result = self._request('GET', '/api/public/v1/download', params)
-                content = result.get('content', '')
+                result = self._request('GET', '/api/public/v1/download', params_json)
+                # 优先 content_noencode（完整正文），其次 title（摘要/开头），最后 content
+                content = (result.get('content_noencode', '')
+                           or result.get('title', '')
+                           or result.get('content', ''))
             
-            # text/markdown 格式可能包含 CSS 前缀，需要去掉
+            # text/markdown 格式可能包含 CSS 前缀，需要去掉（仅对原始 raw text 有效）
             if format in ('text', 'markdown') and content.startswith('#js_'):
                 # 找到第一个真正的内容行
                 lines = content.split('\n')
@@ -280,10 +298,9 @@ class MpTextAPI:
                 content = '\n'.join(content_lines)
             
             return content.strip()
-            
         except requests.exceptions.RequestException as e:
             raise Exception(f"Network request failed: {e}")
-    
+
     def get_author_info(self, fakeid: str) -> dict:
         """
         查询公众号主体信息
